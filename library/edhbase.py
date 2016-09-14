@@ -29,12 +29,12 @@ Script will only create table if it doesn't exists. HBase command looks like 'cr
 In ansible it should look like this:
 
  - name: Creating table
-   edhbase: type=table name='t1' params='{NAME => ‘f1′, VERSIONS => 1, TTL => 2592000, BLOCKCACHE => true}'
+   edhbase: type=table name='t1' params='{NAME => ‘f1′, VERSIONS => 1, TTL => 2592000, BLOCKCACHE => true}' state=create
 
 IF you want to add table to namespace use:
 
  - name: Creating table
-   edhbase: type=table name='t1' params='{NAME => ‘f1′, VERSIONS => 1, TTL => 2592000, BLOCKCACHE => true}' namespace='test_namespace'
+   edhbase: type=table name='t1' params='{NAME => ‘f1′, VERSIONS => 1, TTL => 2592000, BLOCKCACHE => true}' namespace='test_namespace' state=create
 
 To create namespace:
 
@@ -175,7 +175,8 @@ def main():
       if params_a == None:
         module.fail_json(msg='Params required')
       if result == 0:
-        if "ERROR" in executehbase("create '{0}':'{1}', {2}'".format(namespace_a, name_a, params_a))[0]:
+        stdout = executehbase("create '{0}:{1}', {2}".format(namespace_a, name_a, params_a))[0]
+        if "error" in stdout.lower:
           module.fail_json(msg='Error while creating table')
         else:
           module.exit_json(changed=True, msg='Table created')
